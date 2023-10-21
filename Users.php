@@ -11,7 +11,7 @@ use ArrayAccess\TrayDigita\App\Modules\Users\Factory\UserEntityFactory;
 use ArrayAccess\TrayDigita\Auth\Cookie\UserAuth;
 use ArrayAccess\TrayDigita\Auth\Roles\Interfaces\PermissionInterface;
 use ArrayAccess\TrayDigita\Collection\Config;
-use ArrayAccess\TrayDigita\Container\Container;
+use ArrayAccess\TrayDigita\Container\Interfaces\SystemContainerInterface;
 use ArrayAccess\TrayDigita\Database\Connection;
 use ArrayAccess\TrayDigita\Database\Entities\Abstracts\AbstractUser;
 use ArrayAccess\TrayDigita\Database\Entities\Interfaces\CapabilityEntityFactoryInterface;
@@ -46,11 +46,12 @@ use const FILTER_VALIDATE_DOMAIN;
 use const PHP_INT_MIN;
 
 /**
- * @method Container getContainer()
+ * @method SystemContainerInterface getContainer()
  */
 final class Users extends AbstractModule
 {
     use TranslatorTrait;
+
     protected string $name = 'Users & Auth';
 
     /**
@@ -224,7 +225,7 @@ final class Users extends AbstractModule
                 $container,
                 $manager
             );
-            if ($container instanceof Container) {
+            if ($container instanceof SystemContainerInterface) {
                 $container->set(PermissionInterface::class, $permission);
             } else {
                 $container->set(PermissionInterface::class, fn () => $permission);
@@ -386,7 +387,7 @@ final class Users extends AbstractModule
         if ($hasUserEntity && $hasAdminEntity) {
             return $this;
         }
-        if ($container instanceof Container) {
+        if ($container instanceof SystemContainerInterface) {
             if (!$hasUserEntity) {
                 $container->set(UserEntityFactory::class, UserEntityFactory::class);
             }
