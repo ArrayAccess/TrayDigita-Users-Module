@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Index;
 use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
 
@@ -21,24 +22,25 @@ use Doctrine\ORM\Mapping\Table;
         'charset' => 'utf8mb4', // remove this or change to utf8 if not use mysql
         'collation' => 'utf8mb4_unicode_ci',  // remove this if not use mysql
         'comment' => 'Role relation capability & meta',
+        'priority' => 2,
         'primaryKey' => [
-            'class_id',
-            'name'
+            'role_identity',
+            'capability_identity'
         ]
     ]
 )]
 #[Index(
-    columns: ['role_identity'],
-    name: 'relation_capabilities_role_identity_roles_identity'
+    columns: ['role_identity', 'site_id'],
+    name: 'relation_role_capabilities_identity_roles_identity_sites_id'
 )]
 #[Index(
-    columns: ['capability_identity'],
-    name: 'relation_capabilities_capability_identity_capabilities_identity'
+    columns: ['capability_identity', 'site_id'],
+    name: 'relation_roles_cap_cap_id_capabilities_identity_site_id'
 )]
 #[HasLifecycleCallbacks]
 class RoleCapability extends AbstractEntity
 {
-    const TABLE_NAME = 'role_capabilities';
+    public const TABLE_NAME = 'role_capabilities';
     
     #[Id]
     #[Column(
@@ -64,6 +66,7 @@ class RoleCapability extends AbstractEntity
     )]
     protected string $capability_identity;
 
+    #[JoinTable(name: Role::TABLE_NAME)]
     #[
         JoinColumn(
             name: 'role_identity',
@@ -71,7 +74,18 @@ class RoleCapability extends AbstractEntity
             nullable: false,
             onDelete: 'RESTRICT',
             options: [
-                'relation_name' => 'relation_capabilities_role_identity_roles_identity',
+                'relation_name' => 'relation_role_capabilities_identity_roles_identity_sites_id',
+                'onUpdate' => 'CASCADE',
+                'onDelete' => 'RESTRICT'
+            ]
+        ),
+        JoinColumn(
+            name: 'site_id',
+            referencedColumnName: 'site_id',
+            nullable: false,
+            onDelete: 'RESTRICT',
+            options: [
+                'relation_name' => 'relation_role_capabilities_identity_roles_identity_sites_id',
                 'onUpdate' => 'CASCADE',
                 'onDelete' => 'RESTRICT'
             ]
@@ -89,6 +103,7 @@ class RoleCapability extends AbstractEntity
     ]
     protected Role $role;
 
+    #[JoinTable(name: Capability::TABLE_NAME)]
     #[
         JoinColumn(
             name: 'capability_identity',
@@ -96,7 +111,18 @@ class RoleCapability extends AbstractEntity
             nullable: false,
             onDelete: 'RESTRICT',
             options: [
-                'relation_name' => 'relation_capabilities_capability_identity_capabilities_identity',
+                'relation_name' => 'relation_roles_cap_cap_id_capabilities_identity_site_id',
+                'onUpdate' => 'CASCADE',
+                'onDelete' => 'RESTRICT'
+            ]
+        ),
+        JoinColumn(
+            name: 'site_id',
+            referencedColumnName: 'site_id',
+            nullable: false,
+            onDelete: 'RESTRICT',
+            options: [
+                'relation_name' => 'relation_roles_cap_cap_id_capabilities_identity_site_id',
                 'onUpdate' => 'CASCADE',
                 'onDelete' => 'RESTRICT'
             ]

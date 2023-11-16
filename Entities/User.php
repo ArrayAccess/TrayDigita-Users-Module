@@ -1,12 +1,10 @@
 <?php
-/** @noinspection PhpUnused */
 declare(strict_types=1);
 
 namespace ArrayAccess\TrayDigita\App\Modules\Users\Entities;
 
+use ArrayAccess\TrayDigita\App\Modules\Media\Entities\UserAttachment;
 use ArrayAccess\TrayDigita\Database\Entities\Abstracts\AbstractUser;
-use ArrayAccess\TrayDigita\Database\TypeList;
-use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Event\PostLoadEventArgs;
@@ -25,8 +23,8 @@ use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 
 /**
- * @property-read DateTimeInterface $school_year
- * @property-read ?int $class_id
+ * @property-read ?int $site_id
+ * @property-read ?Site $site
  * @property-read ?UserAttachment $attachment
  */
 #[Entity]
@@ -36,39 +34,25 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
         'charset' => 'utf8mb4',
         'collation' => 'utf8mb4_unicode_ci',
         'comment' => 'User lists',
+        'priority' => 5,
     ]
 )]
 #[UniqueConstraint(
-    name: 'unique_username',
-    columns: ['username']
+    name: 'unique_username_site_id',
+    columns: ['username', 'site_id']
 )]
 #[UniqueConstraint(
-    name: 'unique_email',
-    columns: ['email']
+    name: 'unique_email_site_id',
+    columns: ['email', 'site_id']
 )]
 #[UniqueConstraint(
-    name: 'unique_identity_number',
-    columns: ['identity_number']
+    name: 'unique_identity_number_site_id',
+    columns: ['identity_number', 'site_id']
 )]
 #[Index(
-    columns: ['school_year', 'status'],
-    name: 'index_school_year_status'
+    columns: ['username', 'status', 'role', 'first_name', 'last_name', 'site_id'],
+    name: 'index_username_status_role_first_name_last_name_site_id'
 )]
-#[Index(
-    columns: ['username', 'status', 'role', 'first_name', 'last_name', 'school_year'],
-    name: 'index_username_status_role_first_name_last_name_school_year'
-)]
-/*
-#[Index(
-    columns: ['class_id', 'role'],
-    name: 'index_class_id_role'
-)]
-#[Index(
-    columns: ['class_id'],
-    name: 'relation_users_class_id_classes_id'
-)]
-*/
-
 #[Index(
     columns: ['related_user_id'],
     name: 'relation_users_related_user_id_users_id'
@@ -81,61 +65,85 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     columns: ['role'],
     name: 'relation_users_role_roles_identity'
 )]
+#[Index(
+    columns: ['site_id'],
+    name: 'relation_users_site_id_sites_id'
+)]
 #[HasLifecycleCallbacks]
 class User extends AbstractUser
 {
-    const TABLE_NAME = 'users';
-    const ROLE_STUDENT  = 'student';
-    const ROLE_ALUMNI   = 'alumni';
-    const ROLE_GUARDIAN = 'guardian';
-    const ROLE_GUEST = 'guest';
+    public const TABLE_NAME = 'users';
 
-    protected array $availableRoles = [
-        self::ROLE_STUDENT,
-        self::ROLE_ALUMNI,
-        self::ROLE_GUARDIAN,
-        self::ROLE_GUEST,
-    ];
-
-    /*
     #[Column(
-        name: 'class_id',
+        name: 'identity_number',
+        type: Types::STRING,
+        length: 255,
+        nullable: true,
+        updatable: true,
+        options: [
+            'default' => null,
+            'comment' => 'Unique identity number'
+        ]
+    )]
+    protected ?string $identity_number = null;
+    #[Column(
+        name: 'username',
+        type: Types::STRING,
+        length: 255,
+        nullable: false,
+        updatable: true,
+        options: [
+            'comment' => 'Unique username'
+        ]
+    )]
+    protected string $username;
+
+    #[Column(
+        name: 'email',
+        type: Types::STRING,
+        length: 320,
+        nullable: false,
+        updatable: true,
+        options: [
+            'comment' => 'Unique email'
+        ]
+    )]
+    protected string $email;
+
+    #[Column(
+        name: 'site_id',
         type: Types::BIGINT,
         length: 20,
         nullable: true,
         options: [
-            'unsigned' => true,
             'default' => null,
-            'comment' => 'Class id'
+            'unsigned' => true,
+            'comment' => 'Site id'
         ]
     )]
-    protected ?int $class_id = null;
+    protected ?int $site_id = null;
 
     #[
         JoinColumn(
-            name: 'class_id',
+            name: 'site_id',
             referencedColumnName: 'id',
             nullable: true,
-            onDelete: 'CASCADE',
+            onDelete: 'RESTRICT',
             options: [
-                'relation_name' => 'relation_users_class_id_classes_id',
+                'relation_name' => 'relation_users_site_id_sites_id',
                 'onUpdate' => 'CASCADE',
-                'onDelete' => 'CASCADE'
+                'onDelete' => 'RESTRICT'
             ]
         ),
         ManyToOne(
-            targetEntity: Classes::class,
+            targetEntity: Site::class,
             cascade: [
-                "persist",
-                "remove",
-                "merge",
-                "detach"
+                "persist"
             ],
             fetch: 'EAGER'
         )
     ]
-    protected ?Classes $class;
-    */
+    protected ?Site $site = null;
 
     #[Column(
         name: 'related_user_id',
@@ -143,22 +151,12 @@ class User extends AbstractUser
         length: 20,
         nullable: true,
         options: [
-            'unsigned' => true,
             'default' => null,
+            'unsigned' => true,
             'comment' => 'Relational user id'
         ]
     )]
     protected ?int $related_user_id = null;
-
-    #[Column(
-        name: 'school_year',
-        type: TypeList::YEAR,
-        nullable: false,
-        options: [
-            'comment' => 'User school year'
-        ]
-    )]
-    protected DateTimeInterface $school_year;
 
     #[
         JoinColumn(
@@ -226,53 +224,26 @@ class User extends AbstractUser
     ]
     protected ?Role $roleObject = null;
 
-    public function getSchoolYear(): DateTimeInterface
+    public function getSiteId(): ?int
     {
-        return $this->school_year;
+        return $this->site_id;
     }
 
-    public function setSchoolYear(DateTimeInterface|int|null $school_year): void
+    public function setSiteId(?int $site_id): void
     {
-        /** @noinspection DuplicatedCode */
-        if (is_int($school_year)) {
-            $school_year = (string) $school_year;
-            if ($school_year < 1000) {
-                do {
-                    $school_year = "0$school_year";
-                } while (strlen($school_year) < 4);
-            }
-            $school_year = substr($school_year, 0, 4);
-            $school_year = DateTimeImmutable::createFromFormat(
-                '!Y-m-d',
-                "$school_year-01-01"
-            )?:new DateTimeImmutable("$school_year-01-01 00:00:00");
-        }
-
-        $this->school_year = $school_year;
+        $this->site_id = $site_id;
     }
 
-    public function getClassId(): ?int
+    public function getSite(): ?Site
     {
-        return $this->class_id;
+        return $this->site;
     }
 
-    /*
-    public function setClassId(?int $class_id): void
+    public function setSite(?Site $site): void
     {
-        $this->class_id = $class_id;
+        $this->site = $site;
+        $this->setSiteId($site?->getId());
     }
-
-    public function getClass(): ?Classes
-    {
-        return $this->class;
-    }
-
-    public function setClass(?Classes $class): void
-    {
-        $this->class = $class;
-        $this->setClassId($class?->getId());
-    }
-    */
 
     public function getObjectRole(): Role
     {

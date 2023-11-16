@@ -21,6 +21,10 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
+    columns: ['updated_at'],
+    name: 'index_updated_at'
+)]
+#[Index(
     columns: ['user_id', 'name', 'created_at', 'updated_at'],
     name: 'index_user_id_name_created_at_updated_at'
 )]
@@ -31,7 +35,7 @@ use Doctrine\ORM\Mapping\Table;
 #[HasLifecycleCallbacks]
 class AdminOnlineActivity extends AbstractBasedOnlineActivity
 {
-    const TABLE_NAME = 'admin_online_activities';
+    public const TABLE_NAME = 'admin_online_activities';
 
     #[
         JoinColumn(

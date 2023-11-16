@@ -42,7 +42,7 @@ use Doctrine\ORM\Mapping\Table;
  */
 class AdminMeta extends AbstractBasedMeta
 {
-    const TABLE_NAME = 'admin_meta';
+    public const TABLE_NAME = 'admin_meta';
 
     #[Id]
     #[Column(

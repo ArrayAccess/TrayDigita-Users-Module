@@ -31,7 +31,7 @@ use Doctrine\ORM\Mapping\Table;
 #[HasLifecycleCallbacks]
 class UserLog extends AbstractUserBasedLog
 {
-    const TABLE_NAME = 'user_logs';
+    public const TABLE_NAME = 'user_logs';
 
     #[
         JoinColumn(

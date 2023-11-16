@@ -15,11 +15,14 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Index;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\PostLoad;
 use Doctrine\ORM\Mapping\PrePersist;
 use Doctrine\ORM\Mapping\PreUpdate;
 use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
 #[Entity]
 #[Table(
@@ -27,12 +30,21 @@ use Doctrine\ORM\Mapping\Table;
     options: [
         'charset' => 'utf8mb4', // remove this or change to utf8 if not use mysql
         'collation' => 'utf8mb4_unicode_ci',  // remove this if not use mysql
-        'comment' => 'Table roles'
+        'comment' => 'Table roles',
+        'priority' => 1,
+        'primaryKey' => [
+            'identity',
+            'site_id'
+        ],
     ]
 )]
 #[Index(
-    columns: ['name'],
-    name: 'index_name'
+    columns: ['identity', 'site_id'],
+    name: 'index_identity_site_id'
+)]
+#[Index(
+    columns: ['site_id'],
+    name: 'relation_roles_site_id_sites_id'
 )]
 #[HasLifecycleCallbacks]
 /**
@@ -42,7 +54,7 @@ use Doctrine\ORM\Mapping\Table;
  */
 class Role extends AbstractEntity implements RoleInterface
 {
-    const TABLE_NAME = 'roles';
+    public const TABLE_NAME = 'roles';
 
     private ?string $originIdentity = null;
 
@@ -79,6 +91,41 @@ class Role extends AbstractEntity implements RoleInterface
     )]
     protected ?string $description = null;
 
+    #[Column(
+        name: 'site_id',
+        type: Types::BIGINT,
+        length: 20,
+        nullable: true,
+        options: [
+            'unsigned' => true,
+            'default' => null,
+            'comment' => 'Site id'
+        ]
+    )]
+    protected ?int $site_id = null;
+
+    #[
+        JoinColumn(
+            name: 'site_id',
+            referencedColumnName: 'id',
+            nullable: true,
+            onDelete: 'CASCADE',
+            options: [
+                'relation_name' => 'relation_roles_site_id_sites_id',
+                'onUpdate' => 'CASCADE',
+                'onDelete' => 'CASCADE'
+            ]
+        ),
+        ManyToOne(
+            targetEntity: Site::class,
+            cascade: [
+                "persist"
+            ],
+            fetch: 'EAGER'
+        )
+    ]
+    protected ?Site $site = null;
+
     #[OneToMany(
         mappedBy: 'role',
         targetEntity: RoleCapability::class,
@@ -90,7 +137,7 @@ class Role extends AbstractEntity implements RoleInterface
         ],
         fetch: 'LAZY'
     )]
-    protected ?Collection $roleCapability = null;
+    protected ?Collection $roleCapabilities = null;
 
     public function getIdentity(): string
     {
@@ -133,9 +180,33 @@ class Role extends AbstractEntity implements RoleInterface
         return $this->getIdentity();
     }
 
-    public function getRoleCapability(): ?Collection
+    public function getSiteId(): ?int
     {
-        return $this->roleCapability;
+        return $this->site_id;
+    }
+
+    public function setSiteId(?int $site_id): void
+    {
+        $this->site_id = $site_id;
+    }
+
+    public function getSite(): ?Site
+    {
+        return $this->site;
+    }
+
+    public function setSite(?Site $site): void
+    {
+        $this->site = $site;
+        $this->setSiteId($site?->getId());
+    }
+
+    /**
+     * @return ?Collection<RoleCapability>
+     */
+    public function getRoleCapabilities(): ?Collection
+    {
+        return $this->roleCapabilities;
     }
 
     #[

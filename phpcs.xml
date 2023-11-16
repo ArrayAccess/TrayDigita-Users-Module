@@ -27,6 +27,13 @@
     <file>Entities/</file>
     <file>Factory/</file>
     <file>Users.php</file>
+    <!-- constant visibility -->
+    <rule ref="PSR12.Properties">
+        <properties>
+            <property name="UseSpacing" value="1"/>
+            <property name="ConstantVisibility" value="1"/>
+        </properties>
+    </rule>
     <!-- Slevomat Ruleset -->
     <config name="installed_paths" value="vendor/slevomat/coding-standard/SlevomatCodingStandard"/>
     <!-- detect spacing -->

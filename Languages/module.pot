@@ -20,17 +20,9 @@ msgstr ""
 "translatePluralContext:1,2,4c;transNX:1,2,4c;_nx:1,2,4c\n"
 "X-Poedit-SearchPath-0: Entities\n"
 "X-Poedit-SearchPath-1: Factory\n"
-"X-Poedit-SearchPath-2: Users.php\n"
+"X-Poedit-SearchPath-2: Controllers\n"
+"X-Poedit-SearchPath-3: Routes\n"
+"X-Poedit-SearchPath-4: Users.php\n"
 "X-Poedit-SearchPathExcluded-0: *.css\n"
 "X-Poedit-SearchPathExcluded-1: *.html\n"
 "X-Poedit-SearchPathExcluded-2: *.json\n"
-
-#: Users.php:96
-msgctxt "module"
-msgid "Users & Auth"
-msgstr ""
-
-#: Users.php:105
-msgctxt "module"
-msgid "Core module that support users & authentication"
-msgstr ""

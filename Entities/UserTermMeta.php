@@ -22,8 +22,8 @@ use Doctrine\ORM\Mapping\Table;
         'collation' => 'utf8mb4_unicode_ci',
         'comment' => 'User term metadata',
         'primaryKey' => [
-            'post_id',
-            'name'
+            'term_id',
+            'term_group_id'
         ]
     ]
 )]
@@ -42,7 +42,7 @@ use Doctrine\ORM\Mapping\Table;
  */
 class UserTermMeta extends AbstractBasedMeta
 {
-    const TABLE_NAME = 'user_term_meta';
+    public const TABLE_NAME = 'user_term_meta';
 
     #[Id]
     #[Column(

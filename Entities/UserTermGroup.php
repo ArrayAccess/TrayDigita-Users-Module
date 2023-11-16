@@ -49,7 +49,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  */
 class UserTermGroup extends AbstractEntity implements AvailabilityStatusEntityInterface
 {
-    const TABLE_NAME = 'user_term_groups';
+    public const TABLE_NAME = 'user_term_groups';
 
     use AvailabilityStatusTrait;
 
@@ -101,7 +101,6 @@ class UserTermGroup extends AbstractEntity implements AvailabilityStatusEntityIn
         ]
     )]
     protected string $status;
-
     #[
         JoinColumn(
             name: 'user_id',

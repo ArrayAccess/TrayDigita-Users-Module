@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace ArrayAccess\TrayDigita\App\Modules\Users\Entities;
 
-use ArrayAccess\TrayDigita\Auth\Roles\SuperAdminRole;
+use ArrayAccess\TrayDigita\App\Modules\Media\Entities\Attachment;
 use ArrayAccess\TrayDigita\Database\Entities\Abstracts\AbstractUser;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\Index;
@@ -14,6 +16,8 @@ use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 
 /**
+ * @property-read ?int $site_id
+ * @property-read ?Site $site
  * @property-read ?Attachment $attachment
  */
 #[Entity]
@@ -22,24 +26,25 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     options: [
         'charset' => 'utf8mb4',
         'collation' => 'utf8mb4_unicode_ci',
-        'comment' => 'Administrator users'
+        'comment' => 'Administrator users',
+        'priority' => 5,
     ]
 )]
 #[UniqueConstraint(
-    name: 'unique_username',
-    columns: ['username']
+    name: 'unique_username_site_id',
+    columns: ['username', 'site_id']
 )]
 #[UniqueConstraint(
-    name: 'unique_email',
-    columns: ['email']
+    name: 'unique_email_site_id',
+    columns: ['email', 'site_id']
 )]
 #[UniqueConstraint(
-    name: 'unique_identity_number',
-    columns: ['identity_number']
+    name: 'unique_identity_number_site_id',
+    columns: ['identity_number', 'site_id']
 )]
 #[Index(
-    columns: ['username', 'status', 'role', 'first_name', 'last_name'],
-    name: 'index_username_status_role_first_name_last_name'
+    columns: ['username', 'status', 'role', 'first_name', 'last_name', 'site_id'],
+    name: 'index_username_status_role_first_name_last_name_site_id'
 )]
 #[Index(
     columns: ['attachment_id'],
@@ -49,78 +54,85 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     columns: ['role'],
     name: 'relation_admins_role_roles_identity'
 )]
+#[Index(
+    columns: ['site_id'],
+    name: 'relation_admins_site_id_sites_id'
+)]
 #[HasLifecycleCallbacks]
 class Admin extends AbstractUser
 {
-    const TABLE_NAME = 'admins';
+    public const TABLE_NAME = 'admins';
 
-    const ROLE_SUPER_ADMIN = SuperAdminRole::NAME;
-    // administrator and it was co admin
-    const ROLE_ADMIN = 'admin';
-    const ROLE_PRESIDENT = 'president';
-    const ROLE_VICE_PRESIDENT = 'vice_president';
-    const ROLE_RECTOR = 'rector';
-    const ROLE_VICE_RECTOR = 'vice_rector';
-    // dean
-    const ROLE_DEAN = 'dean';
-    const ROLE_VICE_DEAN = 'vice_dean';
-    // faculty
-    const ROLE_HEAD_FACULTY = 'head_faculty';
-    const ROLE_VICE_HEAD_FACULTY = 'vice_head_faculty';
+    #[Column(
+        name: 'identity_number',
+        type: Types::STRING,
+        length: 255,
+        nullable: true,
+        updatable: true,
+        options: [
+            'default' => null,
+            'comment' => 'Unique identity number'
+        ]
+    )]
+    protected ?string $identity_number = null;
+    #[Column(
+        name: 'username',
+        type: Types::STRING,
+        length: 255,
+        nullable: false,
+        updatable: true,
+        options: [
+            'comment' => 'Unique username'
+        ]
+    )]
+    protected string $username;
 
-    // department
-    const ROLE_HEAD_DEPARTMENT = 'head_department';
-    const ROLE_VICE_HEAD_DEPARTMENT = 'vice_head_department';
+    #[Column(
+        name: 'email',
+        type: Types::STRING,
+        length: 320,
+        nullable: false,
+        updatable: true,
+        options: [
+            'comment' => 'Unique email'
+        ]
+    )]
+    protected string $email;
 
-    // headmaster
-    const ROLE_HEADMASTER = 'headmaster';
-    const ROLE_VICE_HEADMASTER = 'vice_headmaster';
-    // hrd
-    const ROLE_HUMAN_RESOURCE_DEPARTMENT = 'human_resource_department';
-    const ROLE_HUMAN_RESOURCE_MANAGEMENT = 'human_resource_management';
+    #[Column(
+        name: 'site_id',
+        type: Types::BIGINT,
+        length: 20,
+        nullable: true,
+        options: [
+            'default' => null,
+            'unsigned' => true,
+            'comment' => 'Site id'
+        ]
+    )]
+    protected ?int $site_id = null;
 
-    // lecturer
-    const ROLE_LECTURER = 'lecturer';
-    const ROLE_TEACHER = 'teacher';
-    const ROLE_COUNSELING_GUIDANCE = 'counseling_guidance';
-    const ROLE_SUPERVISOR = 'supervisor';
-    const ROLE_LIBRARIAN = 'librarian';
-    // staff
-    const ROLE_OFFICE_STAFF = 'office_staff';
-    // treasurer
-    const ROLE_TREASURER = 'treasurer';
-    // office admin
-    const ROLE_OFFICE_ADMINISTRATION = 'office_admin';
-    // other staff / worker
-    const ROLE_STAFF = 'staff';
-
-    protected array $availableRoles = [
-        self::ROLE_SUPER_ADMIN,
-        self::ROLE_ADMIN,
-        self::ROLE_PRESIDENT,
-        self::ROLE_VICE_PRESIDENT,
-        self::ROLE_RECTOR,
-        self::ROLE_VICE_RECTOR,
-        self::ROLE_DEAN,
-        self::ROLE_VICE_DEAN,
-        self::ROLE_HEAD_FACULTY,
-        self::ROLE_VICE_HEAD_FACULTY,
-        self::ROLE_HEAD_DEPARTMENT,
-        self::ROLE_VICE_HEAD_DEPARTMENT,
-        self::ROLE_HEADMASTER,
-        self::ROLE_VICE_HEADMASTER,
-        self::ROLE_HUMAN_RESOURCE_DEPARTMENT,
-        self::ROLE_HUMAN_RESOURCE_MANAGEMENT,
-        self::ROLE_LECTURER,
-        self::ROLE_TEACHER,
-        self::ROLE_COUNSELING_GUIDANCE,
-        self::ROLE_SUPERVISOR,
-        self::ROLE_LIBRARIAN,
-        self::ROLE_OFFICE_STAFF,
-        self::ROLE_TREASURER,
-        self::ROLE_OFFICE_ADMINISTRATION,
-        self::ROLE_STAFF,
-    ];
+    #[
+        JoinColumn(
+            name: 'site_id',
+            referencedColumnName: 'id',
+            nullable: true,
+            onDelete: 'RESTRICT',
+            options: [
+                'relation_name' => 'relation_admins_site_id_sites_id',
+                'onUpdate' => 'CASCADE',
+                'onDelete' => 'RESTRICT'
+            ]
+        ),
+        ManyToOne(
+            targetEntity: Site::class,
+            cascade: [
+                "persist"
+            ],
+            fetch: 'EAGER'
+        )
+    ]
+    protected ?Site $site = null;
 
     #[
         JoinColumn(
@@ -165,6 +177,27 @@ class Admin extends AbstractUser
         )
     ]
     protected ?Role $roleObject = null;
+
+    public function getSiteId(): ?int
+    {
+        return $this->site_id;
+    }
+
+    public function setSiteId(?int $site_id): void
+    {
+        $this->site_id = $site_id;
+    }
+
+    public function getSite(): ?Site
+    {
+        return $this->site;
+    }
+
+    public function setSite(?Site $site): void
+    {
+        $this->site = $site;
+        $this->setSiteId($site?->getId());
+    }
 
     public function getObjectRole(): Role
     {

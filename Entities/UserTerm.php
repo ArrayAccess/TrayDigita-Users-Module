@@ -37,12 +37,16 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     ]
 )]
 #[UniqueConstraint(
-    name: 'unique_name',
-    columns: ['name']
+    name: 'unique_name_site_id',
+    columns: ['name', 'site_id']
 )]
 #[Index(
     columns: ['user_id'],
     name: 'relation_user_terms_user_id_admins_id'
+)]
+#[Index(
+    columns: ['site_id'],
+    name: 'relation_user_terms_site_id_sites_id'
 )]
 #[Index(
     columns: ['name', 'title', 'status'],
@@ -60,10 +64,11 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  * @property-read DateTimeInterface $created_at
  * @property-read DateTimeInterface $updated_at
  * @property-read ?DateTimeInterface $deleted_at
+ * @property-read ?Site $site
  */
 class UserTerm extends AbstractEntity implements AvailabilityStatusEntityInterface
 {
-    const TABLE_NAME = 'user_terms';
+    public const TABLE_NAME = 'user_terms';
 
     use AvailabilityStatusTrait,
         PasswordTrait;
@@ -81,7 +86,6 @@ class UserTerm extends AbstractEntity implements AvailabilityStatusEntityInterfa
         ]
     )]
     protected int $id;
-
     #[Column(
         name: 'user_id',
         type: Types::BIGINT,
@@ -94,6 +98,19 @@ class UserTerm extends AbstractEntity implements AvailabilityStatusEntityInterfa
         ]
     )]
     protected ?int $user_id = null;
+
+    #[Column(
+        name: 'site_id',
+        type: Types::BIGINT,
+        length: 20,
+        nullable: true,
+        options:  [
+            'unsigned' => true,
+            'default' => null,
+            'comment' => 'Admin id'
+        ]
+    )]
+    protected ?int $site_id = null;
 
     #[Column(
         name: 'name',
@@ -165,7 +182,7 @@ class UserTerm extends AbstractEntity implements AvailabilityStatusEntityInterfa
             'comment' => 'Published at'
         ]
     )]
-    protected ?DateTimeInterface $published_at;
+    protected ?DateTimeInterface $published_at = null;
 
     #[Column(
         name: 'created_at',
@@ -205,6 +222,28 @@ class UserTerm extends AbstractEntity implements AvailabilityStatusEntityInterfa
 
     #[
         JoinColumn(
+            name: 'site_id',
+            referencedColumnName: 'id',
+            nullable: true,
+            onDelete: 'CASCADE',
+            options: [
+                'relation_name' => 'relation_user_terms_site_id_sites_id',
+                'onUpdate' => 'CASCADE',
+                'onDelete' => 'CASCADE'
+            ]
+        ),
+        ManyToOne(
+            targetEntity: Site::class,
+            cascade: [
+                "persist"
+            ],
+            fetch: 'EAGER'
+        )
+    ]
+    protected ?Site $site = null;
+
+    #[
+        JoinColumn(
             name: 'user_id',
             referencedColumnName: 'id',
             nullable: true,
@@ -227,16 +266,8 @@ class UserTerm extends AbstractEntity implements AvailabilityStatusEntityInterfa
 
     public function __construct()
     {
-        $this->user_id = null;
-        $this->title = null;
-        $this->content = '';
-        $this->user = null;
-        $this->status = self::DRAFT;
-        $this->password = null;
         $this->created_at = new DateTimeImmutable();
         $this->updated_at = new DateTimeImmutable('0000-00-00 00:00:00');
-        $this->published_at = null;
-        $this->deleted_at = null;
     }
 
     public function getId() : int
@@ -343,6 +374,27 @@ class UserTerm extends AbstractEntity implements AvailabilityStatusEntityInterfa
     {
         $this->user = $user;
         $this->setUserId($user?->getId());
+    }
+
+    public function getSiteId(): ?int
+    {
+        return $this->site_id;
+    }
+
+    public function setSiteId(?int $site_id): void
+    {
+        $this->site_id = $site_id;
+    }
+
+    public function getSite(): ?Site
+    {
+        return $this->site;
+    }
+
+    public function setSite(?Site $site): void
+    {
+        $this->site = $site;
+        $this->setSiteId($site?->getId());
     }
 
     #[

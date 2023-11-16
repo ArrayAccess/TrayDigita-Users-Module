@@ -20,6 +20,10 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
+    columns: ['updated_at'],
+    name: 'index_updated_at'
+)]
+#[Index(
     columns: ['user_id', 'name', 'created_at', 'updated_at'],
     name: 'index_user_id_name_created_at_updated_at'
 )]
@@ -29,7 +33,7 @@ use Doctrine\ORM\Mapping\Table;
 )]
 class UserOnlineActivity extends AbstractBasedOnlineActivity
 {
-    const TABLE_NAME = 'user_online_activities';
+    public const TABLE_NAME = 'user_online_activities';
 
     #[
         JoinColumn(

@@ -1,5 +1,4 @@
 <?php
-/** @noinspection PhpUnused */
 declare(strict_types=1);
 
 namespace ArrayAccess\TrayDigita\App\Modules\Users\Entities;
@@ -19,10 +18,15 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\Index;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\PostLoad;
 use Doctrine\ORM\Mapping\PrePersist;
 use Doctrine\ORM\Mapping\Table;
+use function preg_replace;
+use function strtolower;
+use function trim;
 
 /**
  * @property-read string $identity
@@ -37,12 +41,21 @@ use Doctrine\ORM\Mapping\Table;
     options: [
         'charset' => 'utf8mb4', // remove this or change to utf8 if not use mysql
         'collation' => 'utf8mb4_unicode_ci',  // remove this if not use mysql
-        'comment' => 'Capabilities'
+        'comment' => 'Capabilities',
+        'priority' => 0,
+        'primaryKey' => [
+            'identity',
+            'site_id'
+        ],
     ]
 )]
 #[Index(
-    columns: ['name'],
-    name: 'index_name'
+    columns: ['identity', 'site_id'],
+    name: 'index_identity_site_id'
+)]
+#[Index(
+    columns: ['site_id'],
+    name: 'relation_capabilities_site_id_sites_id'
 )]
 #[Index(
     columns: ['type'],
@@ -51,12 +64,11 @@ use Doctrine\ORM\Mapping\Table;
 #[HasLifecycleCallbacks]
 class Capability extends AbstractEntity implements CapabilityEntityInterface
 {
-    const TABLE_NAME = 'capabilities';
-    const TYPE_USER = 'user';
-    const TYPE_ADMIN = 'admin';
+    public const TABLE_NAME = 'capabilities';
 
-    const TYPE_GLOBAL = null;
-    const TYPE_GLOBAL_ALTERNATE = 'global';
+    public const TYPE_GLOBAL = 'global';
+
+    public const TYPE_GLOBAL_ALTERNATE = null;
 
     #[Id]
     #[Column(
@@ -103,6 +115,44 @@ class Capability extends AbstractEntity implements CapabilityEntityInterface
     )]
     protected ?string $type = null;
 
+    #[Column(
+        name: 'site_id',
+        type: Types::BIGINT,
+        length: 20,
+        nullable: true,
+        options: [
+            'unsigned' => true,
+            'default' => null,
+            'comment' => 'Site id'
+        ]
+    )]
+    protected ?int $site_id = null;
+
+    #[
+        JoinColumn(
+            name: 'site_id',
+            referencedColumnName: 'id',
+            nullable: true,
+            onDelete: 'CASCADE',
+            options: [
+                'relation_name' => 'relation_capabilities_site_id_sites_id',
+                'onUpdate' => 'CASCADE',
+                'onDelete' => 'CASCADE'
+            ]
+        ),
+        ManyToOne(
+            targetEntity: Site::class,
+            cascade: [
+                "persist"
+            ],
+            fetch: 'EAGER'
+        )
+    ]
+    protected ?Site $site = null;
+
+    /**
+     * @var ?Collection<RoleCapability> $roleCapability
+     */
     #[OneToMany(
         mappedBy: 'capability',
         targetEntity: RoleCapability::class,
@@ -114,9 +164,6 @@ class Capability extends AbstractEntity implements CapabilityEntityInterface
         ],
         fetch: 'LAZY'
     )]
-    /**
-     * @var ?Collection<RoleCapability> $roleCapability
-     */
     protected ?Collection $roleCapability = null;
 
     public function getIdentity(): string
@@ -156,8 +203,25 @@ class Capability extends AbstractEntity implements CapabilityEntityInterface
 
     public function setType(?string $type): void
     {
-        $type = is_string($type) ? strtolower(trim($type)) : $type;
-        $this->type = $type;
+        $this->type = $this->normalizeType($type);
+    }
+
+    public function normalizeType(?string $type): string
+    {
+        return $type && $type !== self::TYPE_GLOBAL ? match (trim($type)) {
+            '' => self::TYPE_GLOBAL_ALTERNATE,
+            default => strtolower(trim($type))
+        } : self::TYPE_GLOBAL_ALTERNATE;
+    }
+
+    public function getNormalizeType() : string
+    {
+        return $this->normalizeType($this->getType());
+    }
+
+    public function isType(?string $type): bool
+    {
+        return $this->normalizeType($type) === $this->getNormalizeType();
     }
 
     public function isGlobal() : bool
@@ -167,42 +231,12 @@ class Capability extends AbstractEntity implements CapabilityEntityInterface
         return $type === '' || $type === null || $type === self::TYPE_GLOBAL;
     }
 
-    public function isUser() : bool
-    {
-        $type = $this->getType();
-        return (is_string($type) ? trim($type) : $type) === self::TYPE_USER;
-    }
-
-    public function isAdmin() : bool
-    {
-        $type = $this->getType();
-        return (is_string($type) ? trim($type) : $type) === self::TYPE_ADMIN;
-    }
-
     /**
      * @return ?Collection<RoleCapability>
      */
     public function getRoleCapability(): ?Collection
     {
         return $this->roleCapability;
-    }
-
-    /** @noinspection PhpUnusedParameterInspection */
-    #[
-        PostLoad,
-        PrePersist
-    ]
-    public function postLoadChangeIdentity(
-        PrePersistEventArgs|PostLoadEventArgs $event
-    ) : void {
-        $this->identity = strtolower(trim($this->identity));
-        $this->identity = preg_replace('~[\s_]+~', '_', $this->identity);
-        $this->identity = trim($this->identity, '_');
-        if ($this->identity === '') {
-            throw new EmptyArgumentException(
-                'Identity could not being empty or contain whitespace only'
-            );
-        }
     }
 
     public function has(RoleInterface|string $role) : bool
@@ -225,5 +259,50 @@ class Capability extends AbstractEntity implements CapabilityEntityInterface
                 return $r->getRole();
             }
         );
+    }
+
+    public function getSiteId(): ?int
+    {
+        return $this->site_id;
+    }
+
+    public function setSiteId(?int $site_id): void
+    {
+        $this->site_id = $site_id;
+    }
+
+    public function getSite(): ?Site
+    {
+        return $this->site;
+    }
+
+    public function setSite(?Site $site): void
+    {
+        $this->site = $site;
+        $this->setSiteId($site?->getId());
+    }
+
+    #[
+        PostLoad,
+        PrePersist
+    ]
+    public function postLoadPersistEventChange(
+        PrePersistEventArgs|PostLoadEventArgs $event
+    ) : void {
+        $isPostLoad = $event instanceof PostLoadEventArgs;
+        if ($isPostLoad) {
+            $normalizeType = $this->getNormalizeType();
+            if ($normalizeType !== $this->type) {
+                $this->type = $normalizeType;
+            }
+        }
+        $this->identity = strtolower(trim($this->identity));
+        $this->identity = preg_replace('~[\s_]+~', '_', $this->identity);
+        $this->identity = trim($this->identity, '_');
+        if (! $isPostLoad && $this->identity === '') {
+            throw new EmptyArgumentException(
+                'Identity could not being empty or contain whitespace only'
+            );
+        }
     }
 }
