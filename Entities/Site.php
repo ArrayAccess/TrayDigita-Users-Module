@@ -366,8 +366,6 @@ class Site extends AbstractEntity implements IdentityBasedEntityInterface, Avail
     #[PostLoad]
     final public function finalPostLoaded(PostLoadEventArgs $postLoadEventArgs): void
     {
-        print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2));
-        exit;
         $this->postLoad = true;
     }
 }

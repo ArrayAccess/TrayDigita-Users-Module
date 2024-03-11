@@ -30,7 +30,7 @@ class Option extends AbstractRepositoryUserDepends
         if ($site instanceof Site) {
             $argumentValid = true;
             if ($site->isPostLoad()) {
-                return $site;
+                return $site?:null;
             }
             $site = $site->getId();
             if (!is_int($site)) {
@@ -101,10 +101,15 @@ class Option extends AbstractRepositoryUserDepends
             );
     }
 
+    /**
+     * @param Site|int|null $site
+     * @return int|null
+     */
     private function normalizeSiteId(Site|int|null $site = null) : ?int
     {
         $site ??= $this->users->getSite();
-        return !$site ? null : (is_int($site) ? $site : $site->getId());
+        $site = $site instanceof Site ? $site->getId() : $site;
+        return is_int($site) ? $site : null;
     }
 
     public function getOrCreate(
@@ -112,6 +117,7 @@ class Option extends AbstractRepositoryUserDepends
         &$siteObject = null,
         Site|false|null $site = false
     ): ?Options {
+        $site = $site?:null;
         $option = $this->get($name, $site, $siteObject);
         if (!$option) {
             $option = new Options();
@@ -135,8 +141,7 @@ class Option extends AbstractRepositoryUserDepends
 
     /**
      * @param string $name
-     * @param null $siteId
-     * @param ?Sites $site
+     * @param Site|null $site
      * @return Options|null
      */
     public function get(
