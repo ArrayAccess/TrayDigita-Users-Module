@@ -43,20 +43,20 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     columns: ['identity_number', 'site_id']
 )]
 #[Index(
-    columns: ['username', 'status', 'role', 'first_name', 'last_name', 'site_id'],
-    name: 'index_username_status_role_first_name_last_name_site_id'
+    name: 'index_username_status_role_first_name_last_name_site_id',
+    columns: ['username', 'status', 'role', 'first_name', 'last_name', 'site_id']
 )]
 #[Index(
-    columns: ['attachment_id'],
-    name: 'relation_admins_attachment_id_attachments_id'
+    name: 'relation_admins_attachment_id_attachments_id',
+    columns: ['attachment_id']
 )]
 #[Index(
-    columns: ['role'],
-    name: 'relation_admins_role_roles_identity'
+    name: 'relation_admins_role_roles_identity',
+    columns: ['role']
 )]
 #[Index(
-    columns: ['site_id'],
-    name: 'relation_admins_site_id_sites_id'
+    name: 'relation_admins_site_id_sites_id',
+    columns: ['site_id']
 )]
 #[HasLifecycleCallbacks]
 class Admin extends AbstractUser

@@ -20,16 +20,16 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
-    columns: ['updated_at'],
-    name: 'index_updated_at'
+    name: 'index_updated_at',
+    columns: ['updated_at']
 )]
 #[Index(
-    columns: ['user_id', 'name', 'created_at', 'updated_at'],
-    name: 'index_user_id_name_created_at_updated_at'
+    name: 'index_user_id_name_created_at_updated_at',
+    columns: ['user_id', 'name', 'created_at', 'updated_at']
 )]
 #[Index(
-    columns: ['user_id'],
-    name: 'relation_user_online_activities_user_id_users_id'
+    name: 'relation_user_online_activities_user_id_users_id',
+    columns: ['user_id']
 )]
 class UserOnlineActivity extends AbstractBasedOnlineActivity
 {
@@ -52,7 +52,7 @@ class UserOnlineActivity extends AbstractBasedOnlineActivity
             cascade: [
                 "persist",
                 "remove",
-                "merge",
+                // "merge",
                 "detach"
             ],
             fetch: 'LAZY'

@@ -28,12 +28,12 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
-    columns: ['name'],
-    name: 'index_name'
+    name: 'index_name',
+    columns: ['name']
 )]
 #[Index(
-    columns: ['term_group_id'],
-    name: 'relation_user_term_group_meta_term_group_id_user_terms_group_id'
+    name: 'relation_user_term_group_meta_term_group_id_user_terms_group_id',
+    columns: ['term_group_id']
 )]
 #[HasLifecycleCallbacks]
 /**
@@ -74,7 +74,7 @@ class UserTermGroupMeta extends AbstractBasedMeta
             cascade: [
                 "persist",
                 "remove",
-                "merge",
+                // "merge",
                 "detach"
             ],
             fetch: 'EAGER'

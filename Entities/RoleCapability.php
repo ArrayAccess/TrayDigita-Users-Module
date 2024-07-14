@@ -30,12 +30,12 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
-    columns: ['role_identity', 'site_id'],
-    name: 'relation_role_capabilities_identity_roles_identity_sites_id'
+    name: 'relation_role_capabilities_identity_roles_identity_sites_id',
+    columns: ['role_identity', 'site_id']
 )]
 #[Index(
-    columns: ['capability_identity', 'site_id'],
-    name: 'relation_roles_cap_cap_id_capabilities_identity_site_id'
+    name: 'relation_roles_cap_cap_id_capabilities_identity_site_id',
+    columns: ['capability_identity', 'site_id']
 )]
 #[HasLifecycleCallbacks]
 class RoleCapability extends AbstractEntity
@@ -95,7 +95,7 @@ class RoleCapability extends AbstractEntity
             cascade: [
                 "persist",
                 "remove",
-                "merge",
+                // "merge",
                 "detach"
             ],
             fetch: 'LAZY'
@@ -132,7 +132,7 @@ class RoleCapability extends AbstractEntity
             cascade: [
                 "persist",
                 "remove",
-                "merge",
+                // "merge",
                 "detach"
             ],
             fetch: 'LAZY'

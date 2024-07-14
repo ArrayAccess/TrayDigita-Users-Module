@@ -28,12 +28,12 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
-    columns: ['name'],
-    name: 'index_name'
+    name: 'index_name',
+    columns: ['name']
 )]
 #[Index(
-    columns: ['user_id'],
-    name: 'relation_user_meta_user_id_users_id'
+    name: 'relation_user_meta_user_id_users_id',
+    columns: ['user_id']
 )]
 #[HasLifecycleCallbacks]
 /**
@@ -74,7 +74,7 @@ class UserMeta extends AbstractBasedMeta
             cascade: [
                 "persist",
                 "remove",
-                "merge",
+                // "merge",
                 "detach"
             ],
             fetch: 'EAGER'

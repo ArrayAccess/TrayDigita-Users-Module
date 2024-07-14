@@ -60,16 +60,16 @@ use const PHP_INT_MIN;
     columns: ['domain'],
 )]
 #[Index(
-    columns: ['user_id'],
-    name: 'relation_sites_user_id_admins_id'
+    name: 'relation_sites_user_id_admins_id',
+    columns: ['user_id']
 )]
 #[Index(
-    columns: ['domain', 'domain_alias'],
-    name: 'index_domain_domain_alias'
+    name: 'index_domain_domain_alias',
+    columns: ['domain', 'domain_alias']
 )]
 #[Index(
-    columns: ['name', 'domain', 'domain_alias', 'status'],
-    name: 'index_name_domain_domain_alias_status'
+    name: 'index_name_domain_domain_alias_status',
+    columns: ['name', 'domain', 'domain_alias', 'status']
 )]
 #[HasLifecycleCallbacks]
 class Site extends AbstractEntity implements IdentityBasedEntityInterface, AvailabilityStatusEntityInterface
@@ -363,11 +363,12 @@ class Site extends AbstractEntity implements IdentityBasedEntityInterface, Avail
         return $this->postLoad;
     }
 
+    /** @noinspection PhpUnusedParameterInspection */
     #[PostLoad]
     final public function finalPostLoaded(PostLoadEventArgs $postLoadEventArgs): void
     {
-        print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2));
-        exit;
+//        print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2));
+//        exit;
         $this->postLoad = true;
     }
 }

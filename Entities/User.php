@@ -50,24 +50,24 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     columns: ['identity_number', 'site_id']
 )]
 #[Index(
-    columns: ['username', 'status', 'role', 'first_name', 'last_name', 'site_id'],
-    name: 'index_username_status_role_first_name_last_name_site_id'
+    name: 'index_username_status_role_first_name_last_name_site_id',
+    columns: ['username', 'status', 'role', 'first_name', 'last_name', 'site_id']
 )]
 #[Index(
-    columns: ['related_user_id'],
-    name: 'relation_users_related_user_id_users_id'
+    name: 'relation_users_related_user_id_users_id',
+    columns: ['related_user_id']
 )]
 #[Index(
-    columns: ['attachment_id'],
-    name: 'relation_users_attachment_id_user_attachments_id'
+    name: 'relation_users_attachment_id_user_attachments_id',
+    columns: ['attachment_id']
 )]
 #[Index(
-    columns: ['role'],
-    name: 'relation_users_role_roles_identity'
+    name: 'relation_users_role_roles_identity',
+    columns: ['role']
 )]
 #[Index(
-    columns: ['site_id'],
-    name: 'relation_users_site_id_sites_id'
+    name: 'relation_users_site_id_sites_id',
+    columns: ['site_id']
 )]
 #[HasLifecycleCallbacks]
 class User extends AbstractUser
@@ -345,10 +345,8 @@ class User extends AbstractUser
                 ->update($this::class, 'x')
                 ->set('x.related_user_id', ':val')
                 ->where('x.id = :id')
-                ->setParameters([
-                    'val' => null,
-                    'id' => $this->getId(),
-                ]);
+                ->setParameter('val', null)
+                ->setParameter('id', $this->getId());
             $date = $this->getUpdatedAt();
             /** @noinspection PhpConditionAlreadyCheckedInspection */
             if ($date instanceof DateTimeInterface) {

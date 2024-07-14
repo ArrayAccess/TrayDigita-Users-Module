@@ -8,5 +8,5 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 final class DashboardAPI extends AbstractAPIAttributes
 {
-    const API_SUB_PREFIX = 'dashboard';
+    public const API_SUB_PREFIX = 'dashboard';
 }

@@ -21,12 +21,12 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
-    columns: ['user_id'],
-    name: 'relation_admin_logs_user_id_admins_id'
+    name: 'relation_admin_logs_user_id_admins_id',
+    columns: ['user_id']
 )]
 #[Index(
-    columns: ['user_id', 'name', 'type'],
-    name: 'index_user_id_name_type'
+    name: 'index_user_id_name_type',
+    columns: ['user_id', 'name', 'type']
 )]
 #[HasLifecycleCallbacks]
 class AdminLog extends AbstractUserBasedLog
@@ -50,7 +50,7 @@ class AdminLog extends AbstractUserBasedLog
             cascade: [
                 "persist",
                 "remove",
-                "merge",
+                // "merge",
                 "detach"
             ],
             fetch: 'LAZY'

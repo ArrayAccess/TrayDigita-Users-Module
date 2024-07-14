@@ -22,7 +22,6 @@ use Doctrine\ORM\Mapping\PostLoad;
 use Doctrine\ORM\Mapping\PrePersist;
 use Doctrine\ORM\Mapping\PreUpdate;
 use Doctrine\ORM\Mapping\Table;
-use Doctrine\ORM\Mapping\UniqueConstraint;
 
 #[Entity]
 #[Table(
@@ -39,12 +38,12 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     ]
 )]
 #[Index(
-    columns: ['identity', 'site_id'],
-    name: 'index_identity_site_id'
+    name: 'index_identity_site_id',
+    columns: ['identity', 'site_id']
 )]
 #[Index(
-    columns: ['site_id'],
-    name: 'relation_roles_site_id_sites_id'
+    name: 'relation_roles_site_id_sites_id',
+    columns: ['site_id']
 )]
 #[HasLifecycleCallbacks]
 /**
@@ -127,11 +126,11 @@ class Role extends AbstractEntity implements RoleInterface
     protected ?Site $site = null;
 
     #[OneToMany(
-        mappedBy: 'role',
         targetEntity: RoleCapability::class,
+        mappedBy: 'role',
         cascade: [
             'detach',
-            'merge',
+            // "merge",
             'persist',
             'remove',
         ],

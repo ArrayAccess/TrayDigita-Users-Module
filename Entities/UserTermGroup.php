@@ -32,12 +32,12 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     columns: ['user_id', 'term_id']
 )]
 #[Index(
-    columns: ['term_id'],
-    name: 'relation_user_term_groups_term_id_user_terms_id'
+    name: 'relation_user_term_groups_term_id_user_terms_id',
+    columns: ['term_id']
 )]
 #[Index(
-    columns: ['user_id'],
-    name: 'relation_user_term_groups_user_id_users_id'
+    name: 'relation_user_term_groups_user_id_users_id',
+    columns: ['user_id']
 )]
 #[HasLifecycleCallbacks]
 /**

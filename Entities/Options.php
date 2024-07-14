@@ -14,7 +14,6 @@ use Doctrine\ORM\Mapping\Index;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\Table;
-use Doctrine\ORM\Mapping\UniqueConstraint;
 
 /**
  * @property-read string $name
@@ -34,8 +33,8 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     ]
 )]
 #[Index(
-    columns: ['site_id'],
-    name: 'relation_options_site_id_sites_id'
+    name: 'relation_options_site_id_sites_id',
+    columns: ['site_id']
 )]
 #[HasLifecycleCallbacks]
 class Options extends AbstractEntity

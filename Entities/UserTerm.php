@@ -41,16 +41,16 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
     columns: ['name', 'site_id']
 )]
 #[Index(
-    columns: ['user_id'],
-    name: 'relation_user_terms_user_id_admins_id'
+    name: 'relation_user_terms_user_id_admins_id',
+    columns: ['user_id']
 )]
 #[Index(
-    columns: ['site_id'],
-    name: 'relation_user_terms_site_id_sites_id'
+    name: 'relation_user_terms_site_id_sites_id',
+    columns: ['site_id']
 )]
 #[Index(
-    columns: ['name', 'title', 'status'],
-    name: 'index_name_title_status'
+    name: 'index_name_title_status',
+    columns: ['name', 'title', 'status']
 )]
 #[HasLifecycleCallbacks]
 /**

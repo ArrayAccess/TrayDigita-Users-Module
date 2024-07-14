@@ -50,16 +50,16 @@ use function trim;
     ]
 )]
 #[Index(
-    columns: ['identity', 'site_id'],
-    name: 'index_identity_site_id'
+    name: 'index_identity_site_id',
+    columns: ['identity', 'site_id']
 )]
 #[Index(
-    columns: ['site_id'],
-    name: 'relation_capabilities_site_id_sites_id'
+    name: 'relation_capabilities_site_id_sites_id',
+    columns: ['site_id']
 )]
 #[Index(
-    columns: ['type'],
-    name: 'index_type'
+    name: 'index_type',
+    columns: ['type']
 )]
 #[HasLifecycleCallbacks]
 class Capability extends AbstractEntity implements CapabilityEntityInterface
@@ -154,11 +154,11 @@ class Capability extends AbstractEntity implements CapabilityEntityInterface
      * @var ?Collection<RoleCapability> $roleCapability
      */
     #[OneToMany(
-        mappedBy: 'capability',
         targetEntity: RoleCapability::class,
+        mappedBy: 'capability',
         cascade: [
             'detach',
-            'merge',
+            // "merge",
             'persist',
             'remove',
         ],

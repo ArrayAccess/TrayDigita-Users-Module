@@ -21,16 +21,16 @@ use Doctrine\ORM\Mapping\Table;
     ]
 )]
 #[Index(
-    columns: ['updated_at'],
-    name: 'index_updated_at'
+    name: 'index_updated_at',
+    columns: ['updated_at']
 )]
 #[Index(
-    columns: ['user_id', 'name', 'created_at', 'updated_at'],
-    name: 'index_user_id_name_created_at_updated_at'
+    name: 'index_user_id_name_created_at_updated_at',
+    columns: ['user_id', 'name', 'created_at', 'updated_at']
 )]
 #[Index(
-    columns: ['user_id'],
-    name: 'relation_admin_online_activities_user_id_admins_id'
+    name: 'relation_admin_online_activities_user_id_admins_id',
+    columns: ['user_id']
 )]
 #[HasLifecycleCallbacks]
 class AdminOnlineActivity extends AbstractBasedOnlineActivity
@@ -54,7 +54,7 @@ class AdminOnlineActivity extends AbstractBasedOnlineActivity
             cascade: [
                 "persist",
                 "remove",
-                "merge",
+                // "merge",
                 "detach"
             ],
             fetch: 'LAZY'
